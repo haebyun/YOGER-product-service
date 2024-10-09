@@ -5,8 +5,11 @@ import com.yoger.productserviceorganization.product.dto.request.DemoProductReque
 import com.yoger.productserviceorganization.product.persistence.ProductEntity;
 
 public class ProductMapper {
-    public static ProductEntity toPersistenceFrom(DemoProductRequestDTO productRequestDTO, String imageUrl,
-                                                  String thumbnailImageUrl) {
+    public static ProductEntity toPersistenceFrom(
+            DemoProductRequestDTO productRequestDTO,
+            String imageUrl,
+            String thumbnailImageUrl
+    ) {
         return ProductEntity.of(
                 productRequestDTO.name(),
                 null, // 나중에 설정

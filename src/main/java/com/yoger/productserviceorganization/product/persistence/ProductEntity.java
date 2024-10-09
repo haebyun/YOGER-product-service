@@ -95,8 +95,19 @@ public class ProductEntity {
      * Product의 경우에는 다수의 사용자가 동일한 상품을 수정하는 경우는
      * 존재하지 않기 때문에 작성하지 않음
      */
-    public static ProductEntity of(String name, List<PriceByQuantity> priceByQuantities, String description, String imageUrl, ProductState state,
-                                    String thumbnailImageUrl, Long creatorId, String creatorName ,LocalDateTime dueDate, int initialStockQuantity, int stockQuantity) {
+    public static ProductEntity of(
+            String name,
+            List<PriceByQuantity> priceByQuantities,
+            String description,
+            String imageUrl,
+            ProductState state,
+            String thumbnailImageUrl,
+            Long creatorId,
+            String creatorName,
+            LocalDateTime dueDate,
+            int initialStockQuantity,
+            int stockQuantity
+    ) {
         return new ProductEntity(
                 null,
                 name,

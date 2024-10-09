@@ -29,7 +29,9 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<DemoProductResponseDTO> saveDemo(@Valid @ModelAttribute DemoProductRequestDTO demoProductRequestDTO) {
+    public ResponseEntity<DemoProductResponseDTO> saveDemo(
+            @Valid @ModelAttribute DemoProductRequestDTO demoProductRequestDTO
+    ) {
         DemoProductResponseDTO savedProduct = productService.saveDemoProduct(demoProductRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
