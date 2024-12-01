@@ -20,11 +20,15 @@ configurations {
 }
 
 bootBuildImage {
-    imageName = 'haekwang/yoger-product-service-v3:latest'
+    imageName = 'haekwang/yoger-product-service-v1:latest'
 }
 
 repositories {
     mavenCentral()
+}
+
+bootRun {
+    systemProperty 'spring.profiles.active', 'testdata,aws'
 }
 
 dependencies {
@@ -35,11 +39,18 @@ dependencies {
     implementation platform('software.amazon.awssdk:bom:2.20.56')
     implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.8.3'
 
+    //implementation 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.11.3'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+
     // S3 client
     implementation 'software.amazon.awssdk:s3'
     implementation 'org.springframework.boot:spring-boot-configuration-processor'
 
     implementation 'com.google.cloud:google-cloud-storage:2.44.1'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
