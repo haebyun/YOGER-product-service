@@ -43,6 +43,8 @@ dependencies {
 
     // monitoring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.kafka:spring-kafka'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     //testImplementation 'org.springframework.security:spring-security-test'
