@@ -161,7 +161,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     private void evictCacheForState(ProductState state) {
-        String cacheKey = PRODUCT_ENTITY_CACHE_BY_STATE + " : " + state.name();
+        String cacheKey = PRODUCT_ENTITY_CACHE_BY_STATE + state.name();
         redisTemplate.delete(cacheKey);
     }
 
