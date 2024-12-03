@@ -1,17 +1,19 @@
 package com.yoger.productserviceorganization.product.application;
 
+import com.yoger.productserviceorganization.product.adapters.messaging.kafka.event.StockChangeEvent;
+import com.yoger.productserviceorganization.product.adapters.persistence.UpdateLocation;
 import com.yoger.productserviceorganization.product.adapters.web.dto.request.DemoProductRequestDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.request.UpdatedDemoProductRequestDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.response.DemoProductResponseDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.response.SellableProductResponseDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.response.SimpleDemoProductResponseDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.response.SimpleSellableProductResponseDTO;
-import com.yoger.productserviceorganization.product.domain.exception.InvalidProductException;
 import com.yoger.productserviceorganization.product.domain.exception.InvalidStockException;
 import com.yoger.productserviceorganization.product.domain.model.PriceByQuantity;
 import com.yoger.productserviceorganization.product.domain.model.Product;
 import com.yoger.productserviceorganization.product.domain.model.ProductState;
 import com.yoger.productserviceorganization.product.domain.port.ImageStorageService;
+import com.yoger.productserviceorganization.product.domain.port.MQProducerService;
 import com.yoger.productserviceorganization.product.domain.port.ProductRepository;
 import com.yoger.productserviceorganization.product.mapper.ProductMapper;
 import jakarta.validation.Valid;
@@ -29,6 +31,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ImageStorageService imageStorageService;
+    private final MQProducerService mqProducerService;
 
     public List<SimpleSellableProductResponseDTO> findSimpleSellableProducts() {
         return productRepository.findByState(ProductState.SELLABLE).stream()
@@ -155,12 +158,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     public void changeSellableProductStock(Long productId, Integer quantity) {
-        int flag = productRepository.updateStock(productId, quantity);
-        if(flag == 0) {
-            if(!productRepository.existsById(productId)) {
-                throw new InvalidProductException("존재하지 않는 상품에 대한 재고 변경 요청입니다.");
-            }
+        UpdateLocation updateLocation = productRepository.updateStock(productId, quantity);
+        if(UpdateLocation.ERROR.equals(updateLocation)) {
             throw new InvalidStockException("상품이 판매가능 하지 않거나, 상품의 재고가 부족합니다.");
+        }
+        if(UpdateLocation.CACHE.equals(updateLocation)){
+            mqProducerService.sendStockChangeEvent(StockChangeEvent.of(productId, quantity));
         }
     }
 }
