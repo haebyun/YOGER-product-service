@@ -13,7 +13,7 @@ import java.util.List;
 public interface ProductService {
     List<SimpleSellableProductResponseDTO> findSimpleSellableProducts();
 
-    DemoProductResponseDTO saveDemoProduct(@Valid DemoProductRequestDTO demoProductRequestDTO);
+    DemoProductResponseDTO saveDemoProduct(Long creatorId, @Valid DemoProductRequestDTO demoProductRequestDTO);
 
     List<SimpleDemoProductResponseDTO> findSimpleDemoProducts();
 

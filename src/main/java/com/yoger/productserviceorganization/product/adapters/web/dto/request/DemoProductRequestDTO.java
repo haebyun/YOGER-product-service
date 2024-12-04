@@ -2,7 +2,6 @@ package com.yoger.productserviceorganization.product.adapters.web.dto.request;
 
 import com.yoger.productserviceorganization.product.adapters.web.dto.validation.ValidImage;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,9 +24,6 @@ public record DemoProductRequestDTO(
 
         @ValidImage
         MultipartFile thumbnailImage,
-
-        @NotNull
-        Long creatorId,
 
         @NotBlank
         String creatorName

@@ -41,13 +41,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Transactional
-    public DemoProductResponseDTO saveDemoProduct(@Valid DemoProductRequestDTO demoProductRequestDTO) {
+    public DemoProductResponseDTO saveDemoProduct(Long creatorId, @Valid DemoProductRequestDTO demoProductRequestDTO) {
         String imageUrl = imageStorageService.uploadImage(demoProductRequestDTO.image());
         String thumbnailImageUrl = imageStorageService.uploadImage(demoProductRequestDTO.thumbnailImage());
 
         registerTransactionSynchronizationForImageDeletion(imageUrl, thumbnailImageUrl);
 
-        Product product = ProductMapper.toDomainFrom(demoProductRequestDTO, imageUrl, thumbnailImageUrl);
+        Product product = ProductMapper.toDomainFrom(creatorId, demoProductRequestDTO, imageUrl, thumbnailImageUrl);
         return DemoProductResponseDTO.from(productRepository.save(product));
     }
 

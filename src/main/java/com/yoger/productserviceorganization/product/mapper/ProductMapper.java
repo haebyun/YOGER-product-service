@@ -43,6 +43,7 @@ public class ProductMapper {
     }
 
     public static Product toDomainFrom(
+            Long creatorId,
             DemoProductRequestDTO demoProductRequestDTO,
             String imageUrl,
             String thumbnailImageUrl
@@ -55,7 +56,7 @@ public class ProductMapper {
                 imageUrl,
                 thumbnailImageUrl,
                 ProductState.DEMO,
-                demoProductRequestDTO.creatorId(),
+                creatorId,
                 demoProductRequestDTO.creatorName(),
                 null,
                 0,

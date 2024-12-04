@@ -28,9 +28,10 @@ public class DemoProductController {
 
     @PostMapping
     public ResponseEntity<DemoProductResponseDTO> saveDemo(
+            @RequestHeader(value = "User-Id") Long creatorId,
             @Valid @ModelAttribute DemoProductRequestDTO demoProductRequestDTO
     ) {
-        DemoProductResponseDTO savedDemoProduct = productService.saveDemoProduct(demoProductRequestDTO);
+        DemoProductResponseDTO savedDemoProduct = productService.saveDemoProduct(creatorId, demoProductRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDemoProduct);
     }
 
