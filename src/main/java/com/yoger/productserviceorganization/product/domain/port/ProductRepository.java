@@ -1,5 +1,6 @@
 package com.yoger.productserviceorganization.product.domain.port;
 
+import com.yoger.productserviceorganization.product.adapters.persistence.UpdateLocation;
 import com.yoger.productserviceorganization.product.domain.model.Product;
 import com.yoger.productserviceorganization.product.domain.model.ProductState;
 import java.util.List;
@@ -17,7 +18,7 @@ public interface ProductRepository {
 
     Product findByIdWithLock(Long id);
 
-    Integer updateStock(Long productId, Integer quantity);
+    UpdateLocation updateStock(Long productId, Integer quantity);
 
     Boolean existsById(Long productId);
 }

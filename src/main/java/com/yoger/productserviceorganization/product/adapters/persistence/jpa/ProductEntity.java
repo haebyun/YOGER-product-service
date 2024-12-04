@@ -126,4 +126,23 @@ public class ProductEntity {
                 stockQuantity
         );
     }
+
+    public static ProductEntity withStockChange(ProductEntity cachedEntity, Integer quantity) {
+        return new ProductEntity(
+                cachedEntity.id,
+                cachedEntity.name,
+                cachedEntity.priceByQuantities,
+                cachedEntity.description,
+                cachedEntity.imageUrl,
+                cachedEntity.thumbnailImageUrl,
+                cachedEntity.state,
+                cachedEntity.creatorId,
+                cachedEntity.creatorName,
+                cachedEntity.createdDate,
+                cachedEntity.lastModifiedDate,
+                cachedEntity.dueDate,
+                cachedEntity.initialStockQuantity,
+                cachedEntity.stockQuantity + quantity
+        );
+    }
 }

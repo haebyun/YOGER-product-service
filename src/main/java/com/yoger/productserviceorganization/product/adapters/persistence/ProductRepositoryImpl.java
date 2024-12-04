@@ -18,24 +18,29 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class ProductRepositoryImpl implements ProductRepository {
-    private static final String PRODUCT_ENTITY_CACHE = "productEntity";
-    private static final String PRODUCT_ENTITY_CACHE_BY_STATE = "productEntitiesByState";
-    private static final String PRODUCT_ENTITY_CACHE_ALL = "allProductEntities";
+    private static final String PRODUCT_ENTITY_CACHE = "productEntity : ";
+    private static final String PRODUCT_ENTITY_CACHE_BY_STATE = "productEntitiesByState : ";
+    private static final String PRODUCT_ENTITY_CACHE_ALL = "allProductEntities : ";
+    private static final String PRODUCT_ENTITY_STOCK = "productEntityStock : ";
 
     private final JpaProductRepository jpaProductRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public Product findById(Long productId) {
-        String cacheKey = PRODUCT_ENTITY_CACHE + " : " + productId;
+        return ProductMapper.toDomainFrom(findEntityByIdWithCaching(productId));
+    }
+
+    private ProductEntity findEntityByIdWithCaching(Long productId) {
+        String cacheKey = PRODUCT_ENTITY_CACHE + productId;
         ProductEntity cachedEntity = (ProductEntity) redisTemplate.opsForValue().get(cacheKey);
         if (cachedEntity != null) {
-            return ProductMapper.toDomainFrom(cachedEntity);
+            return cachedEntity;
         }
         ProductEntity productEntity = jpaProductRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
         redisTemplate.opsForValue().set(cacheKey, productEntity, Duration.ofMinutes(5));
-        return ProductMapper.toDomainFrom(productEntity);
+        return productEntity;
     }
 
     @Override
@@ -53,7 +58,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public List<Product> findByState(ProductState state) {
-        String cacheKey = PRODUCT_ENTITY_CACHE_BY_STATE + " : " + state.name();
+        String cacheKey = PRODUCT_ENTITY_CACHE_BY_STATE + state.name();
         List<ProductEntity> cachedEntities = (List<ProductEntity>) redisTemplate.opsForValue().get(cacheKey);
         if (cachedEntities != null) {
             return cachedEntities.stream()
@@ -71,7 +76,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public List<Product> findAll() {
-        String cacheKey = PRODUCT_ENTITY_CACHE_ALL + " : allProducts";
+        String cacheKey = PRODUCT_ENTITY_CACHE_ALL + "allProducts";
         List<ProductEntity> cachedEntities = (List<ProductEntity>) redisTemplate.opsForValue().get(cacheKey);
         if (cachedEntities != null) {
             return cachedEntities.stream()
@@ -92,7 +97,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     public void deleteById(Long productId) {
         jpaProductRepository.deleteById(productId);
 
-        String cacheKey = PRODUCT_ENTITY_CACHE + " : " + productId;
+        String cacheKey = PRODUCT_ENTITY_CACHE + productId;
         redisTemplate.delete(cacheKey);
 
         evictCacheForAllProducts();
@@ -107,16 +112,43 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Integer updateStock(Long productId, Integer quantity) {
+    public UpdateLocation updateStock(Long productId, Integer quantity) {
+        String cacheKey = PRODUCT_ENTITY_STOCK + productId;
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(cacheKey))) {
+            return updateStockInCache(cacheKey, productId, quantity);
+        }
+        return updateStockInDBWithCaching(cacheKey, productId, quantity);
+    }
+
+    private UpdateLocation updateStockInCache(String cacheKey, Long productId, Integer quantity) {
+        Long newStock = redisTemplate.opsForValue().increment(cacheKey, quantity);
+        if (newStock < 0) {
+            // 재고가 음수가 되면 롤백
+            redisTemplate.opsForValue().increment(cacheKey, -quantity);
+            return UpdateLocation.ERROR;
+        }
+        updateByStockChange(productId, quantity);
+        return UpdateLocation.CACHE;
+    }
+
+    private UpdateLocation updateStockInDBWithCaching(String cacheKey, Long productId, Integer quantity) {
         Integer result = jpaProductRepository.updateStock(productId, quantity);
         if (result > 0) {
-            String cacheKey = PRODUCT_ENTITY_CACHE + " : " + productId;
-            ProductEntity updatedEntity = jpaProductRepository.findById(productId)
-                    .orElseThrow(() -> new ProductNotFoundException(productId));
-            redisTemplate.opsForValue().set(cacheKey, updatedEntity, Duration.ofMinutes(5));
+            ProductEntity productEntity = findEntityByIdWithCaching(productId);
+            redisTemplate.opsForValue()
+                    .set(cacheKey, productEntity.getStockQuantity() + quantity, Duration.ofMinutes(5));
             // No need to evict all caches since stock update may not affect other cached data
+            return UpdateLocation.DB;
         }
-        return result;
+        return UpdateLocation.ERROR;
+    }
+
+    private void updateByStockChange(Long productId, Integer quantity) {
+        String cacheKey = PRODUCT_ENTITY_CACHE + productId;
+        ProductEntity cachedEntity = findEntityByIdWithCaching(productId);
+        ProductEntity updatedEntity = ProductEntity.withStockChange(cachedEntity, quantity);
+        redisTemplate.opsForValue()
+                .set(cacheKey, updatedEntity, Duration.ofMinutes(5));
     }
 
     @Override
@@ -125,7 +157,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     private void evictCacheForState(ProductState state) {
-        String cacheKey = PRODUCT_ENTITY_CACHE_BY_STATE + " : " + state.name();
+        String cacheKey = PRODUCT_ENTITY_CACHE_BY_STATE + state.name();
         redisTemplate.delete(cacheKey);
     }
 
