@@ -20,7 +20,7 @@ configurations {
 }
 
 bootBuildImage {
-    imageName = 'haekwang/yoger-product-service-v3:latest'
+    imageName = 'haekwang/yoger-product-service-v4:latest'
 }
 
 repositories {
@@ -51,6 +51,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.39.0'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
