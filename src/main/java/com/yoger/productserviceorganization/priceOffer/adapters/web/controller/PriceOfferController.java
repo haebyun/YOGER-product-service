@@ -26,7 +26,7 @@ public class PriceOfferController {
     
     @PostMapping("/{productId}")
     public ResponseEntity<Void> offerPrices(@PathVariable Long productId,
-                                            @RequestHeader("user-id") Long companyId, //TODO header를 companyId로 변경
+                                            @RequestHeader("User-Id") Long companyId, //TODO header를 companyId로 변경
                                             @RequestBody @Valid PriceOfferRequestDTO priceOfferRequestDTO) {
         priceOfferService.create(productId, companyId, priceOfferRequestDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -39,7 +39,7 @@ public class PriceOfferController {
 
     @PatchMapping("/{productId}")
     public ResponseEntity<Void> update(@PathVariable Long productId,
-                                       @RequestHeader("user-id") Long companyId,
+                                       @RequestHeader("User-Id") Long companyId,
                                        @RequestBody @Valid PriceOfferRequestDTO priceOfferRequestDTO) {
         priceOfferService.update(productId, companyId, priceOfferRequestDTO);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -47,7 +47,7 @@ public class PriceOfferController {
 
     @PatchMapping("/{productId}/confirm")
     public ResponseEntity<Void> confirm(@PathVariable Long productId,
-                                        @RequestHeader("user-id") Long userId,
+                                        @RequestHeader("User-Id") Long userId,
                                         @RequestBody @Valid ConfirmOfferRequestDTO confirmOfferRequestDTO) {
         priceOfferService.confirm(productId, userId, confirmOfferRequestDTO);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -55,7 +55,7 @@ public class PriceOfferController {
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> delete(@PathVariable Long productId,
-                                       @RequestHeader("user-id") Long companyId) {
+                                       @RequestHeader("User-Id") Long companyId) {
         priceOfferService.delete(productId, companyId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
