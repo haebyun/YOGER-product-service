@@ -136,7 +136,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         if (result > 0) {
             ProductEntity productEntity = findEntityByIdWithCaching(productId);
             redisTemplate.opsForValue()
-                    .set(cacheKey, productEntity.getStockQuantity() + quantity, Duration.ofMinutes(5));
+                    .set(cacheKey, productEntity.getStockQuantity(), Duration.ofMinutes(5));
             // No need to evict all caches since stock update may not affect other cached data
             return UpdateLocation.DB;
         }
