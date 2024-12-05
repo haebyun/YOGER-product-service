@@ -20,4 +20,6 @@ public interface ProductRepository {
     Integer updateStock(Long productId, Integer quantity);
 
     Boolean existsById(Long productId);
+
+    List<Product> findByCreatorId(Long creatorId);
 }

@@ -65,4 +65,12 @@ public class ProductRepositoryImpl implements ProductRepository {
     public Boolean existsById(Long productId) {
         return jpaProductRepository.existsById(productId);
     }
+
+    @Override
+    public List<Product> findByCreatorId(Long creatorId) {
+        return jpaProductRepository.findAllByCreatorId(creatorId)
+                .stream()
+                .map(ProductMapper::toDomainFrom)
+                .toList();
+    }
 }

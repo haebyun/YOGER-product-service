@@ -156,11 +156,25 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void changeSellableProductStock(Long productId, Integer quantity) {
         int flag = productRepository.updateStock(productId, quantity);
-        if(flag == 0) {
-            if(!productRepository.existsById(productId)) {
+        if (flag == 0) {
+            if (!productRepository.existsById(productId)) {
                 throw new InvalidProductException("존재하지 않는 상품에 대한 재고 변경 요청입니다.");
             }
             throw new InvalidStockException("상품이 판매가능 하지 않거나, 상품의 재고가 부족합니다.");
         }
+    }
+
+    @Override
+    public List<?> findSimpleDemoProductsByCreatorId(Long creatorId) {
+        return productRepository.findByCreatorId(creatorId)
+                .stream()
+                .map(product -> {
+                    if (product.getState().equals(ProductState.SELLABLE)) {
+                        return SimpleSellableProductResponseDTO.from(product);
+                    } else {
+                        return SimpleDemoProductResponseDTO.from(product);
+                    }
+                })
+                .toList();
     }
 }

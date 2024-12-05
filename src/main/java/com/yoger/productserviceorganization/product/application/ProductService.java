@@ -30,4 +30,6 @@ public interface ProductService {
     void deleteDemoProduct(Long productId, Long creatorId);
 
     void changeSellableProductStock(Long productId, Integer quantity);
+
+    List<?> findSimpleDemoProductsByCreatorId(Long creatorId);
 }
