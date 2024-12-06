@@ -9,7 +9,6 @@ import com.yoger.productserviceorganization.product.domain.model.ProductState;
 import com.yoger.productserviceorganization.product.mapper.ProductMapper;
 import java.time.Duration;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Repository;
 public class ProductRepositoryImpl implements ProductRepository {
     private static final String PRODUCT_ENTITY_CACHE = "productEntity : ";
     private static final String PRODUCT_ENTITY_CACHE_BY_STATE = "productEntitiesByState : ";
-    private static final String PRODUCT_ENTITY_CACHE_ALL = "allProductEntities : ";
     private static final String PRODUCT_ENTITY_STOCK = "productEntityStock : ";
 
     private final JpaProductRepository jpaProductRepository;
@@ -49,7 +47,6 @@ public class ProductRepositoryImpl implements ProductRepository {
         String cacheKey = PRODUCT_ENTITY_CACHE + savedEntity.getId();
         redisTemplate.opsForValue().set(cacheKey, savedEntity, Duration.ofMinutes(5));
 
-        evictCacheForAllProducts();
         evictCacheForState(savedEntity.getState());
 
         return ProductMapper.toDomainFrom(savedEntity);
@@ -74,33 +71,15 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public List<Product> findAll() {
-        String cacheKey = PRODUCT_ENTITY_CACHE_ALL + "allProducts";
-        List<ProductEntity> cachedEntities = (List<ProductEntity>) redisTemplate.opsForValue().get(cacheKey);
-        if (cachedEntities != null) {
-            return cachedEntities.stream()
-                    .map(ProductMapper::toDomainFrom)
-                    .toList();
-        }
-
-        List<ProductEntity> productEntities = jpaProductRepository.findAll();
-
-        redisTemplate.opsForValue().set(cacheKey, productEntities, Duration.ofMinutes(5));
-
-        return productEntities.stream()
-                .map(ProductMapper::toDomainFrom)
-                .toList();
-    }
-
-    @Override
     public void deleteById(Long productId) {
+        ProductState productState = jpaProductRepository.findStateById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId));
         jpaProductRepository.deleteById(productId);
 
         String cacheKey = PRODUCT_ENTITY_CACHE + productId;
         redisTemplate.delete(cacheKey);
 
-        evictCacheForAllProducts();
-        evictAllStateCaches();
+        evictCacheForState(productState);
     }
 
     @Override
@@ -163,21 +142,5 @@ public class ProductRepositoryImpl implements ProductRepository {
     private void evictCacheForState(ProductState state) {
         String cacheKey = PRODUCT_ENTITY_CACHE_BY_STATE + state.name();
         redisTemplate.delete(cacheKey);
-    }
-
-    private void evictCacheForAllProducts() {
-        String pattern = PRODUCT_ENTITY_CACHE_ALL + " : *";
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
-    }
-
-    private void evictAllStateCaches() {
-        String pattern = PRODUCT_ENTITY_CACHE_BY_STATE + " : *";
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
     }
 }

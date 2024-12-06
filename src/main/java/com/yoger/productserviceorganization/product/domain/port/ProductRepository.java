@@ -12,8 +12,6 @@ public interface ProductRepository {
 
     List<Product> findByState(ProductState state);
 
-    List<Product> findAll();
-
     void deleteById(Long productId);
 
     Product findByIdWithLock(Long id);
