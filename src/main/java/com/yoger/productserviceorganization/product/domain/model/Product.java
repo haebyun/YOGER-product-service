@@ -150,10 +150,26 @@ public class Product {
                 product.getCreatorId(),
                 product.getCreatorName(),
                 dueDate,
-                product.getStock()
+                new Stock(100_000_000, 100_000_000)
         );
     }
 
+    public static Product toSaleEndedFrom(Product sellableProduct, Integer soldAmount, Integer finalPrice) {
+        sellableProduct.validateUnexpectedState(ProductState.SELLABLE);
+        return new Product(
+                sellableProduct.id,
+                sellableProduct.name,
+                List.of(new PriceByQuantity(soldAmount, finalPrice)),
+                sellableProduct.description,
+                sellableProduct.imageUrl,
+                sellableProduct.thumbnailImageUrl,
+                ProductState.SALE_ENDED,
+                sellableProduct.creatorId,
+                sellableProduct.creatorName,
+                sellableProduct.dueDate,
+                sellableProduct.stock
+        );
+    }
 
     public void changeStockQuantity(Integer amount) {
         validateUnexpectedState(ProductState.SELLABLE);

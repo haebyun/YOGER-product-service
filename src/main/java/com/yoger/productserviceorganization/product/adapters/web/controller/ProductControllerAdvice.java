@@ -22,10 +22,11 @@ public class ProductControllerAdvice {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleAllError(Exception ex) {
         log.info("wierd problem occur.");
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+/*    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
@@ -64,5 +65,5 @@ public class ProductControllerAdvice {
     @ExceptionHandler(ProductCreatorMismatchException.class)
     public ResponseEntity<String> handleCreatorMismatch(ProductCreatorMismatchException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
-    }
+    }*/
 }

@@ -14,4 +14,7 @@ public record PriceByQuantity(
         @Min(value = 0, message = "가격은 0 이상이어야 합니다.")
         int price
 ) {
+    public Boolean isLargerThenSoldAmount(Integer soldAmount) {
+        return soldAmount <= this.quantity;
+    }
 }

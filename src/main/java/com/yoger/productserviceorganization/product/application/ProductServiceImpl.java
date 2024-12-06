@@ -3,6 +3,7 @@ package com.yoger.productserviceorganization.product.application;
 import com.yoger.productserviceorganization.product.adapters.web.dto.request.DemoProductRequestDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.request.UpdatedDemoProductRequestDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.response.DemoProductResponseDTO;
+import com.yoger.productserviceorganization.product.adapters.web.dto.response.partialRefundRequestDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.response.SellableProductResponseDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.response.SimpleDemoProductResponseDTO;
 import com.yoger.productserviceorganization.product.adapters.web.dto.response.SimpleSellableProductResponseDTO;
@@ -15,7 +16,7 @@ import com.yoger.productserviceorganization.product.domain.port.ImageStorageServ
 import com.yoger.productserviceorganization.product.domain.port.ProductRepository;
 import com.yoger.productserviceorganization.product.mapper.ProductMapper;
 import jakarta.validation.Valid;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -133,11 +134,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Transactional
-    public void updateDemoToSellable(Long productId, Long creatorId, List<PriceByQuantity> priceByQuantities) {
+    public void updateDemoToSellable(Long productId, Long creatorId, List<PriceByQuantity> priceByQuantities, LocalDateTime dueDate) {
         Product demoProduct = productRepository.findById(productId);
         demoProduct.validateCreatorId(creatorId);
 
-        Product sellableProduct = Product.toSellableFrom(demoProduct, priceByQuantities, LocalDate.MAX.atStartOfDay());
+        Product sellableProduct = Product.toSellableFrom(demoProduct, priceByQuantities, dueDate);
         productRepository.save(sellableProduct);
     }
 
@@ -176,5 +177,20 @@ public class ProductServiceImpl implements ProductService {
                     }
                 })
                 .toList();
+    }
+
+    @Override
+    public partialRefundRequestDTO updateSellableToSaleEnded(Long productId, Integer soldAmount) {
+        Product product = productRepository.findById(productId);
+        int originPrice = product.getPriceByQuantities().getFirst().price();
+        int finalPrice = originPrice;
+        for(PriceByQuantity priceByQuantity : product.getPriceByQuantities()) {
+            if(priceByQuantity.isLargerThenSoldAmount(soldAmount)) {
+                finalPrice = priceByQuantity.price();
+            }
+        }
+        Product saleEndedProduct = Product.toSaleEndedFrom(product, soldAmount, finalPrice);
+        productRepository.save(saleEndedProduct);
+        return new partialRefundRequestDTO(productId, originPrice, finalPrice);
     }
 }

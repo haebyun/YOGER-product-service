@@ -55,7 +55,7 @@ public class PriceOfferServiceImpl implements PriceOfferService {
         PriceOffer priceOffer = findById(productId, confirmOfferRequestDTO.companyId());
         priceOffer.confirm();
 
-        productService.updateDemoToSellable(productId, creatorId, priceOffer.getPriceByQuantities());
+        productService.updateDemoToSellable(productId, creatorId, priceOffer.getPriceByQuantities(), confirmOfferRequestDTO.dueDate());
 
         priceOfferRepository.save(priceOffer);
     }
