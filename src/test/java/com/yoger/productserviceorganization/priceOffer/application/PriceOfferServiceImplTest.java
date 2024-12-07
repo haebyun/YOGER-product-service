@@ -17,6 +17,7 @@ import com.yoger.productserviceorganization.priceOffer.domain.port.PriceOfferRep
 import com.yoger.productserviceorganization.priceOffer.mapper.PriceOfferMapper;
 import com.yoger.productserviceorganization.product.application.ProductService;
 import com.yoger.productserviceorganization.product.domain.model.PriceByQuantity;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -94,7 +95,7 @@ class PriceOfferServiceImplTest {
 
     @Test
     void confirm() {
-        ConfirmOfferRequestDTO confirmOfferRequestDTO = new ConfirmOfferRequestDTO(companyId);
+        ConfirmOfferRequestDTO confirmOfferRequestDTO = new ConfirmOfferRequestDTO(companyId, LocalDateTime.MAX);
         PriceOffer priceOffer = PriceOffer.createTemporary(productId, companyId, priceByQuantities);
         given(priceOfferRepository.findById(productId, companyId)).willReturn(Optional.of(priceOffer));
         priceOfferService.confirm(productId, userId, confirmOfferRequestDTO);

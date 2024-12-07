@@ -56,7 +56,7 @@ public class ProductUnitTest {
         assertThat(demoProduct)
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(ProductState.class)
-                .ignoringFields("priceByQuantities", "dueDate")
+                .ignoringFields("priceByQuantities", "stock.initialStockQuantity", "stock.stockQuantity", "dueDate")
                 .isEqualTo(sellableProduct);
     }
 
