@@ -19,8 +19,10 @@ configurations {
     }
 }
 
-bootBuildImage {
-    imageName = 'haebyun/yoger-product-service-v8:latest'
+tasks.named("bootBuildImage") {
+    imageName = "docker.io/haebyun/yoger-product-service-with-observability-v4:4.4.0" // 새 불변 태그!
+    builder   = "paketobuildpacks/builder-jammy-base:latest"
+    runImage  = "paketobuildpacks/run-jammy-base@sha256:18ac7c14a74ce37b63650fd6cac913db4d5574d0764e21dfca582aa7fdd01f5c"
 }
 
 repositories {
@@ -82,6 +84,9 @@ dependencies {
     testImplementation 'org.testcontainers:kafka'
     implementation 'org.testcontainers:localstack'
     testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+    testImplementation 'com.navercorp.fixturemonkey:fixture-monkey-starter:0.6.8'
+    testImplementation 'com.navercorp.fixturemonkey:fixture-monkey-jackson:0.6.8'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
 }
 
 tasks.named('test') {

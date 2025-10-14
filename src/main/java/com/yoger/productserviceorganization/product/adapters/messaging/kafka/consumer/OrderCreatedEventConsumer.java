@@ -33,7 +33,7 @@ class OrderCreatedEventConsumer {
     ) {}
 
     @KafkaListener(
-            topics = "${event.topic.order.created}",
+            topics = "${event.topic.order.created.v2}",
             containerFactory = "kafkaOrderCreatedEventListenerContainerFactory"
     )
     public void consumeOrderCreatedEventBatch(
